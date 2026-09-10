@@ -3,7 +3,6 @@ la forma más rápida, cómoda y precisa para medir FR y FC (etc!)
 
 Cronómetro FR y FC etc. 
 
-Texto para arucip 
 Evalúas un paciente q no tiene monitoreo? 
 Con esta app tienes la forma más rápida, cómoda y precisa que conocemos para medir FR y FC
 
