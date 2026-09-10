@@ -9,13 +9,13 @@ Con esta app tienes la forma más rápida, cómoda y precisa que conocemos para 
 Toca start, cuenta 6 latidos o respiraciones, toca detener y listo ✅ verás la FC o FR o lo q hayas elegido 
 
 Cosas contables
-Gotas 
+Gotas
 Pasos por minuto 
 Vagones 
 Práctica de 1001 
 
 
-Ecuación 
+##Ecuación##
 Inicia cronómetro 
 Cuenta n (= respiraciones o latidos o gotas)(6 mínimo)
 Stop cronómetro = t
