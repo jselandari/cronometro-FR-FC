@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>FR / FC — Cronómetro clínico</title>
+<meta name="theme-color" content="#0E1418">
+<meta name="description" content="Cronómetro para calcular FR y FC por conteo manual">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FR/FC">
+<style>
+  :root{
+    --bg:#0E1418;
+    --surface:#171F26;
+    --surface-2:#1F2A33;
+    --text:#EDF2F5;
+    --text-dim:#8FA0AC;
+    --border:#2A3540;
+    --fr:#49AFC7;
+    --fc:#E15361;
+    --good:#6FCF97;
+    --warn:#E8A33D;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; height:100%;
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+  }
+  body{ display:flex; justify-content:center; padding:24px 16px 40px; }
+  .app{ width:100%; max-width:420px; display:flex; flex-direction:column; gap:20px; }
+  header{ text-align:center; padding-top:8px; }
+  header h1{ font-size:17px; font-weight:600; margin:0 0 2px; color:var(--text-dim); }
+  header p{ margin:0; font-size:13px; color:var(--text-dim); }
+
+  .toggle{ display:flex; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:4px; gap:4px; }
+  .toggle button{ flex:1; border:none; background:transparent; color:var(--text-dim); font-size:15px; font-weight:600; padding:12px 0; border-radius:10px; cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .toggle button.active.fr{ background:var(--fr); color:#062229; }
+  .toggle button.active.fc{ background:var(--fc); color:#2B0509; }
+  .toggle button:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .stage{ background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px 20px 28px; display:flex; flex-direction:column; align-items:center; gap:20px; }
+
+  .timer{ font-variant-numeric:tabular-nums; font-size:56px; font-weight:300; letter-spacing:1px; color:var(--text); }
+  .min-note{ font-size:12px; color:var(--text-dim); margin-top:-14px; text-align:center; }
+
+  .status{ font-size:13px; color:var(--text-dim); min-height:18px; text-align:center; }
+  .status.live.fr{ color:var(--fr); }
+  .status.live.fc{ color:var(--fc); }
+
+  .primary-btn{ width:100%; padding:20px; border-radius:16px; border:none; font-size:18px; font-weight:700; cursor:pointer; color:#0B0F12; }
+  .primary-btn.start{ background:var(--good); }
+  .primary-btn.stop{ background:var(--fc); color:#2B0509; }
+  .primary-btn.reset{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+  .primary-btn:active{ transform:scale(0.98); }
+
+  .entry{ display:none; flex-direction:column; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:22px; }
+  .entry.show{ display:flex; }
+  .entry label{ font-size:14px; color:var(--text-dim); text-align:center; }
+  .entry .elapsed{ font-size:13px; color:var(--text-dim); text-align:center; margin-top:-8px; }
+  .count-input-row{ display:flex; align-items:center; justify-content:center; gap:14px; }
+  .stepper{ width:52px; height:52px; border-radius:50%; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:24px; font-weight:600; cursor:pointer; }
+  .stepper:active{ transform:scale(0.94); }
+  #countInput{
+    width:120px; text-align:center; font-size:44px; font-weight:700;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border);
+    border-radius:14px; padding:8px 0; font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield;
+  }
+  #countInput::-webkit-outer-spin-button, #countInput::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+  .result{ background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:22px; text-align:center; display:none; flex-direction:column; gap:6px; }
+  .result.show{ display:flex; }
+  .result .value{ font-size:48px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .result .unit{ font-size:14px; color:var(--text-dim); }
+  .result .detail{ font-size:12px; color:var(--text-dim); margin-top:6px; }
+  .result .warn{ margin-top:10px; font-size:13px; color:var(--warn); background:rgba(232,163,61,0.12); border:1px solid rgba(232,163,61,0.35); border-radius:10px; padding:8px 10px; }
+
+  footer{ text-align:center; font-size:11px; color:var(--text-dim); padding-top:4px; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Cronómetro FR / FC</h1>
+      <p>Contá mentalmente entre Iniciar y Detener</p>
+    </header>
+
+    <div class="toggle">
+      <button id="btnFR" class="active fr">FR</button>
+      <button id="btnFC" class="fc">FC</button>
+    </div>
+
+    <div class="stage">
+      <div class="timer" id="timer">00:00.0</div>
+      <div class="min-note" id="minNote">Mínimo recomendado: 6 respiraciones</div>
+      <div class="status" id="status">Tocá Iniciar y contá en tu cabeza</div>
+      <button class="primary-btn start" id="mainBtn">Iniciar</button>
+    </div>
+
+    <div class="entry" id="entry">
+      <div class="elapsed" id="elapsedNote"></div>
+      <label id="entryLabel">¿Cuántas respiraciones contaste?</label>
+      <div class="count-input-row">
+        <button class="stepper" id="minusBtn">−</button>
+        <input id="countInput" type="number" inputmode="numeric" min="0" value="0">
+        <button class="stepper" id="plusBtn">+</button>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      <div class="value" id="resultValue">—</div>
+      <div class="unit" id="resultUnit">resp/min</div>
+      <div class="detail" id="resultDetail"></div>
+      <div class="warn" id="resultWarn" style="display:none;"></div>
+    </div>
+
+    <footer>App local, sin conexión ni costo. Los datos no se guardan ni se envían a ningún servidor.</footer>
+  </div>
+
+<script>
+  const state = { mode:'fr', running:false, startTs:null, elapsedSec:0, rafId:null };
+  const CONFIG = {
+    fr: { min:6, unitSingular:'respiración', unitPlural:'respiraciones', rateUnit:'resp/min', color:'fr' },
+    fc: { min:6, unitSingular:'latido', unitPlural:'latidos', rateUnit:'lat/min', color:'fc' },
+  };
+
+  const btnFR=document.getElementById('btnFR'), btnFC=document.getElementById('btnFC');
+  const timerEl=document.getElementById('timer'), minNote=document.getElementById('minNote');
+  const statusEl=document.getElementById('status'), mainBtn=document.getElementById('mainBtn');
+  const entry=document.getElementById('entry'), elapsedNote=document.getElementById('elapsedNote');
+  const entryLabel=document.getElementById('entryLabel'), countInput=document.getElementById('countInput');
+  const minusBtn=document.getElementById('minusBtn'), plusBtn=document.getElementById('plusBtn');
+  const result=document.getElementById('result'), resultValue=document.getElementById('resultValue');
+  const resultUnit=document.getElementById('resultUnit'), resultDetail=document.getElementById('resultDetail');
+  const resultWarn=document.getElementById('resultWarn');
+
+  function cfg(){ return CONFIG[state.mode]; }
+
+  function formatTime(ms){
+    const totalTenths=Math.floor(ms/100), tenths=totalTenths%10;
+    const totalSeconds=Math.floor(totalTenths/10), seconds=totalSeconds%60;
+    const minutes=Math.floor(totalSeconds/60);
+    return String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0')+'.'+tenths;
+  }
+
+  function setMode(mode){
+    if(state.running) return;
+    state.mode=mode;
+    btnFR.classList.toggle('active', mode==='fr');
+    btnFC.classList.toggle('active', mode==='fc');
+    minNote.textContent=`Mínimo recomendado: ${cfg().min} ${cfg().unitPlural}`;
+    entryLabel.textContent=`¿Cuántas ${cfg().unitPlural} contaste?`;
+    resetAll();
+  }
+
+  function resetAll(){
+    state.running=false; state.startTs=null; state.elapsedSec=0;
+    if(state.rafId) cancelAnimationFrame(state.rafId);
+    timerEl.textContent='00:00.0';
+    statusEl.textContent='Tocá Iniciar y contá en tu cabeza';
+    statusEl.className='status';
+    mainBtn.textContent='Iniciar'; mainBtn.className='primary-btn start';
+    entry.classList.remove('show');
+    result.classList.remove('show');
+    countInput.value=0;
+  }
+
+  function tick(){
+    if(!state.running) return;
+    const elapsed=performance.now()-state.startTs;
+    timerEl.textContent=formatTime(elapsed);
+    state.rafId=requestAnimationFrame(tick);
+  }
+
+  function startTimer(){
+    state.running=true; state.startTs=performance.now();
+    statusEl.textContent=`Contá cada ${cfg().unitSingular} en tu cabeza…`;
+    statusEl.className='status live '+cfg().color;
+    mainBtn.textContent='Detener'; mainBtn.className='primary-btn stop';
+    btnFR.disabled=true; btnFC.disabled=true;
+    entry.classList.remove('show'); result.classList.remove('show');
+    tick();
+  }
+
+  function stopTimer(){
+    state.running=false;
+    if(state.rafId) cancelAnimationFrame(state.rafId);
+    state.elapsedSec=(performance.now()-state.startTs)/1000;
+    statusEl.textContent='Ingresá cuánto contaste';
+    statusEl.className='status';
+    mainBtn.textContent='Reiniciar'; mainBtn.className='primary-btn reset';
+    btnFR.disabled=false; btnFC.disabled=false;
+    elapsedNote.textContent=`Tiempo transcurrido: ${state.elapsedSec.toFixed(1)} s`;
+    entry.classList.add('show');
+    countInput.value=cfg().min;
+    countInput.focus();
+    countInput.select();
+    calculate();
+  }
+
+  function calculate(){
+    const count=Math.max(0, parseInt(countInput.value||'0',10));
+    const elapsedSec=state.elapsedSec;
+    if(elapsedSec<=0){ result.classList.remove('show'); return; }
+    const rate=count*60/elapsedSec;
+    resultValue.textContent=Math.round(rate);
+    resultUnit.textContent=cfg().rateUnit;
+    resultDetail.textContent=`${count} ${count===1?cfg().unitSingular:cfg().unitPlural} en ${elapsedSec.toFixed(1)} s`;
+    if(count<cfg().min){
+      resultWarn.style.display='block';
+      resultWarn.textContent=`Conteo por debajo del mínimo recomendado (${cfg().min}). El resultado puede ser impreciso.`;
+    } else {
+      resultWarn.style.display='none';
+    }
+    result.classList.add('show');
+  }
+
+  mainBtn.addEventListener('click', () => {
+    if(mainBtn.classList.contains('start')) startTimer();
+    else if(mainBtn.classList.contains('stop')) stopTimer();
+    else resetAll();
+  });
+
+  countInput.addEventListener('input', calculate);
+  minusBtn.addEventListener('click', () => { countInput.value=Math.max(0,(parseInt(countInput.value||'0',10)-1)); calculate(); });
+  plusBtn.addEventListener('click', () => { countInput.value=(parseInt(countInput.value||'0',10)+1); calculate(); });
+
+  btnFR.addEventListener('click', () => setMode('fr'));
+  btnFC.addEventListener('click', () => setMode('fc'));
+
+  setMode('fr');
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
