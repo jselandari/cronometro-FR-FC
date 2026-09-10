@@ -6,7 +6,8 @@ Cronómetro FR y FC etc.
 Evalúas un paciente q no tiene monitoreo? 
 Con esta app tienes la forma más rápida, cómoda y precisa que conocemos para medir FR y FC
 
-Toca start, cuenta 6 latidos o respiraciones, toca detener y listo ✅ verás la FC o FR o lo q hayas elegido 
+Toca start, cuenta 6 latidos o respiraciones, toca detener y listo ✅ 
+verás la FC o FR o lo q hayas elegido 
 
 Cosas contables
 Gotas
@@ -15,7 +16,7 @@ Vagones
 Práctica de 1001 
 
 
-##Ecuación##
+##Ecuación
 Inicia cronómetro 
 Cuenta n (= respiraciones o latidos o gotas)(6 mínimo)
 Stop cronómetro = t
