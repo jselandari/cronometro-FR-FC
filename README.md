@@ -16,7 +16,7 @@ Vagones
 Práctica de 1001 
 
 
-##Ecuación
+## Ecuación
 Inicia cronómetro 
 Cuenta n (= respiraciones o latidos o gotas)(6 mínimo)
 Stop cronómetro = t
