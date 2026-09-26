@@ -1,14 +1,14 @@
 // ⬇️ CAMBIAR ESTE NÚMERO CUANDO QUIERAS FORZAR UNA ACTUALIZACIÓN
-const CACHE_NAME = 'cronometro-v2';
+const CACHE_NAME = 'cronometro-v3';
 
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './Manifest.json',
+  './Icons/icon-192.png',
+  './Icons/icon-512.png'
 ];
 
 // ---------- Install: precachear todo ----------
