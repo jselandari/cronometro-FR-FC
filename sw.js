@@ -1,5 +1,5 @@
 // ⬇️ CAMBIAR ESTE NÚMERO CUANDO QUIERAS FORZAR UNA ACTUALIZACIÓN
-const CACHE_NAME = 'cronometro-v3';
+const CACHE_NAME = 'cronometro-v4';
 
 const ASSETS = [
   './',
