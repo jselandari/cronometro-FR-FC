@@ -7,8 +7,8 @@ const ASSETS = [
   './styles.css',
   './app.js',
   './Manifest.json',
-  './Icons/icon-192.png',
-  './Icons/icon-512.png'
+  './Icons/Icon-192.png',
+  './Icons/Icon-512.png'
 ];
 
 // ---------- Install: precachear todo ----------
