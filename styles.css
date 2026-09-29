@@ -201,3 +201,17 @@ footer {
   color: var(--text-dim);
   padding-top: 4px;
 }
+
+.titulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.titulo .logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+``
